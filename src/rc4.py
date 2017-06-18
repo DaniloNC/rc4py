@@ -12,11 +12,11 @@
 # object oriented, readable, clean, pure Python implementation that
 # can be dissected and used as a reference model.
 #
-# 
+#
 # Version: 1.0,
 # Release date: 2011-09-01
 #
-# 
+#
 # Author: Joachim Strömbergson
 # Copyright (c) 2011, Secworks Sweden AB
 # All rights reserved.
@@ -26,7 +26,7 @@
 # are met:
 #     * Redistributions of source code must retain the above copyright
 #       notice, this list of conditions and the following disclaimer.
-# 
+#
 #     * Redistributions in binary form must reproduce the above
 #       copyright notice, this list of conditions and the following
 #       disclaimer in the documentation and/or other materials
@@ -51,7 +51,7 @@
 #-------------------------------------------------------------------
 import sys
 
-        
+
 #-------------------------------------------------------------------
 # class RC4()
 #-------------------------------------------------------------------
@@ -68,8 +68,8 @@ class RC4():
         self.keystream = []
         self.S = [0] * 256
         self.verbose = verbose
-        
-        
+
+
     def load_key(self, key):
         """Init the cipher based on the supplied key. the
            method supports variable key lengths."""
@@ -78,7 +78,7 @@ class RC4():
 
         if self.verbose:
             print "Initializing S"
-            
+
         for self.ip in range(256):
             self.id = self.S[self.ip]
             self.keybyte = key[self.ip % len(key)]
@@ -97,10 +97,10 @@ class RC4():
             print "S after initialization:"
             print self.S
             print ""
-            
+
         self.ip = 0
         self.jp = 0
-        
+
 
     def generate_keystream(self, stream_length = 1):
         """Generate and return a list with stream_length keystream bytes."""
@@ -108,7 +108,7 @@ class RC4():
 
         if self.verbose:
             print "Internal variables during keystream generation:"
-            
+
         for i in range(stream_length):
             self.ip = (self.ip + 1) % 256
             self.id = self.S[self.ip]
@@ -124,10 +124,17 @@ class RC4():
             if self.verbose:
                 print "ip = %02x, id = %02x, jp = %02x, jd = %02x, kp = %02x, kd = %02x" %\
                       (self.ip, self.id, self.jp, self.jd, self.kp, self.kd)
-            
+
             self.keystream.append(self.kd)
 
         return self.keystream
+
+
+    def dump_state(self):
+        for i in range(len(self.S)):
+            if (i % 16 == 0) and (i > 1):
+                print ""
+            print "0x%02x" % self.S[i],
 
 
 #-------------------------------------------------------------------
@@ -148,7 +155,7 @@ def print_key(key):
 def print_keystream(keystream):
     print ""
     print "Generated keystream: %s" % ([hex(i) for i in keystream])
-    
+
 
 #-------------------------------------------------------------------
 # test_rc4()
@@ -160,8 +167,9 @@ def test_rc4():
     my_rc4 = RC4(False)
 
     testkeys = [[0x01, 0x01, 0x01, 0x01, 0x01], [0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01],
-               [0x01, 0x02, 0x03, 0x04, 0x05], [0x01, 0x02, 0x03, 0x04, 0x05, 0x01, 0x02, 0x03, 0x04, 0x05]]
-    
+                [0x01, 0x02, 0x03, 0x04, 0x05], [0x01, 0x02, 0x03, 0x04, 0x05, 0x01, 0x02, 0x03, 0x04, 0x05],
+                [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10]]
+
     # RFC 6229 keys1
     rfc6229_keys1 = [[0x01, 0x02, 0x03, 0x04, 0x05],\
                      [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07],\
@@ -191,24 +199,25 @@ def test_rc4():
     for my_key in testkeys:
         print_key(my_key)
         my_rc4.load_key(my_key)
+        my_rc4.dump_state()
         my_keystream = my_rc4.generate_keystream(8)
         print_keystream(my_keystream)
         print "-------------------------------------------------"
 
-    
+
 #-------------------------------------------------------------------
 # main()
 #-------------------------------------------------------------------
 def main():
     test_rc4()
 
-    
+
 #-------------------------------------------------------------------
 # __name__
 # Python thingy which allows the file to be run standalone as
 # well as parsed from within a Python interpreter.
 #-------------------------------------------------------------------
-if __name__=="__main__": 
+if __name__=="__main__":
     # Run the main function.
     sys.exit(main())
 
